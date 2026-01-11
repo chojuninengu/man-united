@@ -1,76 +1,65 @@
+```typescript
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { HEAD_COACH_SYSTEM_PROMPT } from '@/lib/mentor/prompts'
+import { Groq } from 'groq-sdk'
 
 export async function POST(req: Request) {
   const supabase = await createClient()
-  
-  // 1. Auth check
   const { data: { user } } = await supabase.auth.getUser()
+
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
-    const body = await req.json()
-    const { messages, missionId, mode } = body // Expecting history + current mission context
+    const { messages, missionId, mode } = await req.json()
 
-    // 2. Prepare Grok API payload
-    // We assume Grok is OpenAI compatible for simplicity in this MVP implementation plan,
-    // otherwise we would adapt to specific xAI SDK.
-    const apiKey = process.env.MENTOR_API_KEY
-    const apiUrl = process.env.MENTOR_API_URL || 'https://api.x.ai/v1/chat/completions'
-
-    // Inject system prompt with dynamic context if needed (e.g. current mode)
+    // 1. Prepare context (same as before)
     const systemMessage = {
       role: 'system',
-      content: `${HEAD_COACH_SYSTEM_PROMPT}\n\nCURRENT OPERATING MODE: ${mode?.toUpperCase() || 'HOME GAMES'}`
+      content: HEAD_COACH_SYSTEM_PROMPT + `\n\nCURRENT OPERATIONAL MODE: ${mode?.toUpperCase() || 'HOME'}`
     }
 
     const conversation = [systemMessage, ...messages]
 
-    // 3. Call Grok API
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'grok-beta', // or specific model version
-        messages: conversation,
-        temperature: 0.7,
-        stream: false // For MVP simplicity, we'll do blocking first, then streaming if time
-      })
+    // 2. Call Groq SDK
+    // Using MENTOR api key variables mapped to the SDK
+    const groq = new Groq({
+        apiKey: process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
     })
 
-    if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Grok API Error:', errorText)
-        throw new Error(`Grok API failed: ${response.statusText}`)
-    }
+    const completion = await groq.chat.completions.create({
+        messages: conversation,
+        model: "llama-3.3-70b-versatile", // High reasoning model
+        temperature: 0.7,
+        max_completion_tokens: 1024,
+        top_p: 1,
+        stream: false, // Keeping false for MVP frontend compatibility
+        stop: null
+    })
 
-    const data = await response.json()
-    const assistantMessage = data.choices[0].message.content
+    const assistantMessage = completion.choices[0]?.message?.content || "The Head Coach is silent."
 
-    // 4. Save to Supabase (User message + Assistant response)
-    // In a real app we'd do this robustly. Here we assume the frontend sent the user message 
-    // to DB already or we do it here. Let's assume frontend saves User msg, we save Assistant msg.
-    
+    // 3. Save to Supabase (Assistant response)
     if (missionId) {
         // Explicitly assert as any or Partial<Row> if types are mismatching due to Json vs string
         await supabase.from('messages').insert({
             mission_id: missionId,
             role: 'assistant',
             content: assistantMessage,
-            metadata: { model: 'grok-beta' }
+            metadata: { model: 'llama-3.3-70b-versatile' }
         } as any) 
     }
 
     return NextResponse.json({ content: assistantMessage })
 
   } catch (error: any) {
-    console.error('Chat route error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Mentor API Error:', error)
+    return NextResponse.json(
+      { error: error?.message || 'Failed to communicate with Head Coach' },
+      { status: 500 }
+    )
   }
 }
+```
