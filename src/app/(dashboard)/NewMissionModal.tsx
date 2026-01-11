@@ -35,7 +35,7 @@ export function NewMissionModal({
                 target_name: name,
                 stage: 'sighting',
                 mode: 'home'
-            }).select().single()
+            } as any).select().single()
 
             if (error) throw error
 
