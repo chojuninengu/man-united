@@ -1,4 +1,3 @@
-```typescript
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { HEAD_COACH_SYSTEM_PROMPT } from '@/lib/mentor/prompts'
@@ -62,4 +61,3 @@ export async function POST(req: Request) {
     )
   }
 }
-```
