@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  /* Man United Palette */
+  --mu-red-primary: #8B0000;
+  --mu-red-secondary: #DC143C;
+  --mu-gold-primary: #FFD700;
+  --mu-gold-secondary: #DAA520;
+  
+  /* Dark mode default base */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  
+  --card: #171717;
+  --card-foreground: #ededed;
+  
+  --popover: #171717;
+  --popover-foreground: #ededed;
+  
+  --primary: var(--mu-red-primary);
+  --primary-foreground: #ededed;
+  
+  --secondary: var(--mu-gold-primary);
+  --secondary-foreground: #0a0a0a;
+  
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  
+  --accent: var(--mu-red-secondary);
+  --accent-foreground: #ededed;
+  
+  --destructive: #7f1d1d;
+  --destructive-foreground: #ededed;
+  
+  --border: #262626;
+  --input: #262626;
+  --ring: var(--mu-red-primary);
+  
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Custom colors */
+  --color-mu-red: var(--mu-red-primary);
+  --color-mu-gold: var(--mu-gold-primary);
+  
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  @apply antialiased;
+}
