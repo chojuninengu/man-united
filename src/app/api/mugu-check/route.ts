@@ -14,8 +14,8 @@ export async function POST(req: Request) {
     // Quick heuristic check first to save API calls
     if (inputText.length < 5) return NextResponse.json({ isMugu: false })
 
-    const apiKey = process.env.GROK_API_KEY
-    const apiUrl = process.env.GROK_API_URL || 'https://api.x.ai/v1/chat/completions'
+    const apiKey = process.env.MENTOR_API_KEY
+    const apiUrl = process.env.MENTOR_API_URL || 'https://api.x.ai/v1/chat/completions'
 
     // Strict detector prompt
     const systemPrompt = `
