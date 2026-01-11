@@ -23,7 +23,8 @@ export function ModeToggle() {
             // Optimistic update
             setActiveMission({ ...activeMission, mode: newMode })
             // Persist
-            await supabase.from('missions').update({ mode: newMode } as any).eq('id', activeMission.id)
+            // @ts-ignore
+            await supabase.from('missions').update({ mode: newMode }).eq('id', activeMission.id)
         }
     }
 
