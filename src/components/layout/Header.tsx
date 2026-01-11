@@ -4,28 +4,45 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { useAuthActions } from '@/hooks/useAuthActions'
+import { useMissions } from '@/context/MissionContext'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Menu, X, LogOut } from 'lucide-react'
 
 export function ModeToggle() {
-    const [mode, setMode] = useState<'home' | 'away'>('home')
+    const { activeMission, setActiveMission } = useMissions()
+    const supabase = createClient()
+    const [localMode, setLocalMode] = useState<'home' | 'away'>('home')
+
+    // Use active mission mode or fallback to local
+    const currentMode = activeMission?.mode || localMode
+
+    const handleToggle = async (newMode: 'home' | 'away') => {
+        setLocalMode(newMode)
+        if (activeMission) {
+            // Optimistic update
+            setActiveMission({ ...activeMission, mode: newMode })
+            // Persist
+            await supabase.from('missions').update({ mode: newMode } as any).eq('id', activeMission.id)
+        }
+    }
 
     return (
         <div className="flex items-center space-x-1 bg-muted p-1 rounded-full">
             <button
-                onClick={() => setMode('home')}
-                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${mode === 'home'
-                        ? 'bg-mu-red-primary text-white shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
+                onClick={() => handleToggle('home')}
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${currentMode === 'home'
+                    ? 'bg-mu-red-primary text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                     }`}
             >
                 🏠 HOME
             </button>
             <button
-                onClick={() => setMode('away')}
-                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${mode === 'away'
-                        ? 'bg-mu-gold-primary text-black shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
+                onClick={() => handleToggle('away')}
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${currentMode === 'away'
+                    ? 'bg-mu-gold-primary text-black shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                     }`}
             >
                 🏟️ AWAY
