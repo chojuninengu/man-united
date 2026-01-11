@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { Groq } from 'groq-sdk'
 
 export async function POST(req: Request) {
   const supabase = await createClient()
@@ -13,9 +14,6 @@ export async function POST(req: Request) {
     
     // Quick heuristic check first to save API calls
     if (inputText.length < 5) return NextResponse.json({ isMugu: false })
-
-    const apiKey = process.env.MENTOR_API_KEY
-    const apiUrl = process.env.MENTOR_API_URL || 'https://api.x.ai/v1/chat/completions'
 
     // Strict detector prompt
     const systemPrompt = `
@@ -36,30 +34,25 @@ export async function POST(req: Request) {
       "explanation": "Why it's bad (concise)"
     }
     `
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'grok-beta',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analyze this text: "${inputText}"` }
-        ],
-        temperature: 0.1, // Low temp for strict logical checking
-        response_format: { type: "json_object" } // Force JSON if supported, else rely on prompt
-      })
+    // Use SDK
+    const groq = new Groq({
+        apiKey: process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
     })
 
-    if (!response.ok) {
-        throw new Error('Grok API failed')
-    }
+    const completion = await groq.chat.completions.create({
+      messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Analyze this text: "${inputText}"` }
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.1, // Low temp for strict logical checking
+      response_format: { type: "json_object" } 
+    })
 
-    const data = await response.json()
-    const result = JSON.parse(data.choices[0].message.content)
+    const content = completion.choices[0]?.message?.content
+    if (!content) throw new Error('No content from Groq')
+
+    const result = JSON.parse(content)
 
     // Save check to DB for analytics
     if (result.isMugu) {
