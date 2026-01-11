@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { HEAD_COACH_SYSTEM_PROMPT } from '@/lib/grok/prompts'
+import { HEAD_COACH_SYSTEM_PROMPT } from '@/lib/mentor/prompts'
 
 export async function POST(req: Request) {
   const supabase = await createClient()
@@ -18,8 +18,8 @@ export async function POST(req: Request) {
     // 2. Prepare Grok API payload
     // We assume Grok is OpenAI compatible for simplicity in this MVP implementation plan,
     // otherwise we would adapt to specific xAI SDK.
-    const apiKey = process.env.GROK_API_KEY
-    const apiUrl = process.env.GROK_API_URL || 'https://api.x.ai/v1/chat/completions'
+    const apiKey = process.env.MENTOR_API_KEY
+    const apiUrl = process.env.MENTOR_API_URL || 'https://api.x.ai/v1/chat/completions'
 
     // Inject system prompt with dynamic context if needed (e.g. current mode)
     const systemMessage = {
