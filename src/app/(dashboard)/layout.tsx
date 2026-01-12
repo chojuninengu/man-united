@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Header } from '@/components/layout/Header'
+import { UserInfoSidebar } from '@/components/layout/UserInfo'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils/helpers'
 import { Plus, X } from 'lucide-react'
@@ -116,13 +117,14 @@ function MissionSidebar({
     )
 }
 
+
 function DashboardContent({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     return (
-        <div className="flex min-h-screen flex-col bg-background">
+        <div className="flex h-screen flex-col bg-background">
             <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-3.5rem)]">
+            <div className="flex flex-1 overflow-y-hidden">
                 {/* Backdrop for mobile sidebar */}
                 {sidebarOpen && (
                     <div
@@ -136,6 +138,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <main className="flex-1 relative overflow-hidden">
                     {children}
                 </main>
+
+                <UserInfoSidebar />
             </div>
         </div>
     )
