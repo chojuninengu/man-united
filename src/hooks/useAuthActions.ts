@@ -92,6 +92,24 @@ export function useAuthActions() {
     }
   }
 
+  const signInWithGoogle = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/api/auth/callback`,
+            }
+        })
+        if (error) throw error
+    } catch (e: any) {
+        setError(e.message)
+    } finally {
+        setLoading(false)
+    }
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     router.push('/login')
@@ -100,6 +118,7 @@ export function useAuthActions() {
   return { 
     signInWithPassword, 
     signUpWithPassword,
+    signInWithGoogle,
     signOut, 
     loading, 
     error 
