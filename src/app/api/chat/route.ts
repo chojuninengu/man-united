@@ -21,8 +21,18 @@ export async function POST(req: Request) {
     }
 
     const conversation = [systemMessage, ...messages]
+    const lastUserMessage = messages[messages.length - 1]
 
-    // 2. Call Groq SDK
+    // 2. Save USER message to Supabase
+    if (missionId && lastUserMessage?.role === 'user') {
+        await supabase.from('messages').insert({
+            mission_id: missionId,
+            role: 'user',
+            content: lastUserMessage.content
+        } as any)
+    }
+
+    // 3. Call Groq SDK
     // Using MENTOR api key variables mapped to the SDK
     const groq = new Groq({
         apiKey: process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
