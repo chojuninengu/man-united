@@ -34,10 +34,18 @@ export function ChatWindow() {
     const checkMugu = async (text: string) => {
         setCheckingMugu(true)
         try {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
+
             const res = await fetch('/api/mugu-check', {
                 method: 'POST',
-                body: JSON.stringify({ inputText: text })
+                body: JSON.stringify({ inputText: text }),
+                signal: controller.signal
             })
+            clearTimeout(timeoutId)
+
+            if (!res.ok) throw new Error('Mugu check failed')
+
             const data = await res.json()
             if (data.isMugu) {
                 setMuguState({
@@ -48,7 +56,8 @@ export function ChatWindow() {
                 return true
             }
         } catch (e) {
-            console.error(e)
+            console.error('Mugu Check timed out or failed:', e)
+            // If check fails, we let it pass to avoid blocking user
         } finally {
             setCheckingMugu(false)
         }
