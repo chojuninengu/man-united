@@ -57,8 +57,8 @@ export function useChat({ missionId }: { missionId: string | null }) {
 
     try {
       const controller = new AbortController()
-      // Give Groq 20 seconds to generate deep tactical advice
-      const timeoutId = setTimeout(() => controller.abort(), 20000)
+      // Give Groq 30 seconds for complex conversations
+      const timeoutId = setTimeout(() => controller.abort(), 30000)
 
       const res = await fetch('/api/chat', {
         method: 'POST',
