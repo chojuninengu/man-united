@@ -86,8 +86,55 @@ export function ChatWindow() {
 
     if (!missionId) {
         return (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-                Select or start a mission to begin implementation.
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                <div className="max-w-3xl space-y-8">
+                    {/* Header */}
+                    <div className="space-y-2">
+                        <h1 className="text-5xl font-bold text-mu-red-primary tracking-tight">
+                            MAN-UNITED
+                        </h1>
+                        <p className="text-muted-foreground text-lg">
+                            Elite Social Strategy Command Center
+                        </p>
+                    </div>
+
+                    {/* Quick Start Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
+                        <div className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer">
+                            <div className="text-left space-y-2">
+                                <div className="text-mu-gold-primary font-bold">🎯 Start New Mission</div>
+                                <p className="text-sm text-muted-foreground">
+                                    Create a new target profile and begin tactical operations
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer">
+                            <div className="text-left space-y-2">
+                                <div className="text-mu-gold-primary font-bold">🏠 Home Mode</div>
+                                <p className="text-sm text-muted-foreground">
+                                    Master online/texting strategies with the Head Coach
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer">
+                            <div className="text-left space-y-2">
+                                <div className="text-mu-gold-primary font-bold">🏟️ Away Mode</div>
+                                <p className="text-sm text-muted-foreground">
+                                    Get real-time advice for in-person interactions
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="pt-8">
+                        <p className="text-sm text-muted-foreground">
+                            Select a mission from the sidebar or create a new one to begin
+                        </p>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -142,7 +189,7 @@ export function ChatWindow() {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-border bg-background">
+            <div className="sticky bottom-0 p-4 border-t border-border bg-background/95 backdrop-blur z-10">
                 <form onSubmit={handleSubmit} className="flex gap-2">
                     <Input
                         value={input}
