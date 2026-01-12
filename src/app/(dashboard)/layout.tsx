@@ -45,7 +45,7 @@ function MissionSidebar({
                     </Button>
                 </div>
 
-                <div className="p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     <Button
                         className="w-full justify-start gap-2 font-bold"
                         variant="mu"
@@ -67,27 +67,46 @@ function MissionSidebar({
                         )}
 
                         {missions.map((mission) => (
-                            <Button
-                                key={mission.id}
-                                variant={activeMission?.id === mission.id ? "secondary" : "ghost"}
-                                className="w-full justify-start px-2 py-6"
-                                onClick={() => handleSelect(mission)}
-                            >
-                                <div className="flex items-center gap-3 w-full text-left">
-                                    <div className={`h-2 w-2 rounded-full ${mission.stage === 'physical' ? 'bg-red-600' :
-                                        mission.stage === 'blanket' ? 'bg-mu-gold-primary' : 'bg-blue-500'
-                                        }`} />
-                                    <div className="flex-1 overflow-hidden">
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold truncate">{mission.target_name}</span>
-                                            {mission.stage === 'physical' && <span className="text-xs">🔥</span>}
+                            <div key={mission.id} className="relative group">
+                                <Button
+                                    variant={activeMission?.id === mission.id ? "secondary" : "ghost"}
+                                    className="w-full justify-start px-2 py-6 pr-10"
+                                    onClick={() => handleSelect(mission)}
+                                >
+                                    <div className="flex items-center gap-3 w-full text-left">
+                                        <div className={`h-2 w-2 rounded-full ${mission.stage === 'physical' ? 'bg-red-600' :
+                                            mission.stage === 'blanket' ? 'bg-mu-gold-primary' : 'bg-blue-500'
+                                            }`} />
+                                        <div className="flex-1 overflow-hidden">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-semibold truncate">{mission.target_name}</span>
+                                                {mission.stage === 'physical' && <span className="text-xs">🔥</span>}
+                                            </div>
+                                            <p className="text-xs text-muted-foreground truncate uppercase">
+                                                {mission.stage}
+                                            </p>
                                         </div>
-                                        <p className="text-xs text-muted-foreground truncate uppercase">
-                                            {mission.stage}
-                                        </p>
                                     </div>
-                                </div>
-                            </Button>
+                                </Button>
+                                <button
+                                    onClick={async (e) => {
+                                        e.stopPropagation()
+                                        if (confirm(`Delete mission: ${mission.target_name}?`)) {
+                                            const supabase = createClient()
+                                            await supabase.from('missions').delete().eq('id', mission.id)
+                                            refreshMissions()
+                                            if (activeMission?.id === mission.id) {
+                                                setActiveMission(null)
+                                                router.push('/chat')
+                                            }
+                                        }
+                                    }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/20 rounded"
+                                    title="Delete mission"
+                                >
+                                    <X className="h-4 w-4 text-destructive" />
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>
