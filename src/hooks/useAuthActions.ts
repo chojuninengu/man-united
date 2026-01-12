@@ -67,7 +67,7 @@ export function useAuthActions() {
              }
          })
          if (error) throw error
-         router.push('/dashboard/chat') // Auto login often works, or check email
+         router.push('/chat') // Auto login often works, or check email
      } catch (e: any) {
          setError(e.message)
      } finally {
@@ -84,7 +84,7 @@ export function useAuthActions() {
             password
         })
         if (error) throw error
-        router.push('/dashboard/chat')
+        router.push('/chat')
     } catch (e: any) {
         setError(e.message)
     } finally {
