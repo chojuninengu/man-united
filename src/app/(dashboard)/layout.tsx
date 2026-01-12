@@ -113,7 +113,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
                 <MissionSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-                <main className="flex-1 overflow-y-auto p-4 md:p-0 relative">
+                <main className="flex-1 relative">
                     {children}
                 </main>
             </div>
