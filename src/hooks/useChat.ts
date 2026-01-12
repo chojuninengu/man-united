@@ -22,6 +22,10 @@ export function useChat({ missionId }: { missionId: string | null }) {
     setError(null)
 
     try {
+      const controller = new AbortController()
+      // Give Groq 20 seconds to generate deep tactical advice
+      const timeoutId = setTimeout(() => controller.abort(), 20000)
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,8 +33,10 @@ export function useChat({ missionId }: { missionId: string | null }) {
           messages: [...messages, newMessage], // Setup for context window
           missionId,
           mode
-        })
+        }),
+        signal: controller.signal
       })
+      clearTimeout(timeoutId)
 
       if (!res.ok) throw new Error('Communication failed')
 
