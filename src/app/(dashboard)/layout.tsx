@@ -22,7 +22,7 @@ function MissionSidebar({
 
     const handleSelect = (mission: any) => {
         setActiveMission(mission)
-        router.push(`/dashboard/chat?mission=${mission.id}`)
+        router.push(`/chat?mission=${mission.id}`)
         if (window.innerWidth < 768) {
             onClose()
         }
