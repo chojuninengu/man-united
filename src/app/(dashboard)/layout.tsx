@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils/helpers'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { MissionProvider, useMissions } from '@/context/MissionContext'
 import { useRouter } from 'next/navigation'
 import { NewMissionModal } from './NewMissionModal'
+import { createClient } from '@/lib/supabase/client'
 
 function MissionSidebar({
     isOpen,
@@ -16,7 +17,7 @@ function MissionSidebar({
     isOpen: boolean
     onClose: () => void
 }) {
-    const { missions, activeMission, setActiveMission } = useMissions()
+    const { missions, activeMission, setActiveMission, refreshMissions } = useMissions()
     const router = useRouter()
     const [showNewMission, setShowNewMission] = useState(false)
 
