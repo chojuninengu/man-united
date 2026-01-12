@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { GoogleButton } from '@/components/ui/GoogleButton'
 import { useAuthActions } from '@/hooks/useAuthActions'
 
 export default function LoginPage() {
@@ -29,6 +30,20 @@ export default function LoginPage() {
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                    <div className="space-y-4">
+                        <GoogleButton />
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-muted-foreground/20" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">
+                                    Or
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="space-y-4 rounded-md shadow-sm">
                         <div>
                             <Input
