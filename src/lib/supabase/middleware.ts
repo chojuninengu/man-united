@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users away from specific auth pages
   if ((request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')) && user) {
      const url = request.nextUrl.clone()
-     url.pathname = '/dashboard/chat'
+     url.pathname = '/chat'
      return NextResponse.redirect(url)
   }
 
