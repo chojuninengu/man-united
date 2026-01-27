@@ -35,19 +35,37 @@ export async function POST(req: Request) {
     }
     `
     // Use SDK
-    const groq = new Groq({
-        apiKey: process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
-    })
+    const apiKey = process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
+    if (!apiKey) {
+      console.error('Mugu Check: Missing API Key')
+      return NextResponse.json({ isMugu: false })
+    }
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analyze this text: "${inputText}"` }
-      ],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.1, // Low temp for strict logical checking
-      response_format: { type: "json_object" } 
-    })
+    const groq = new Groq({ apiKey })
+
+    let completion;
+    try {
+      completion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Analyze this text: "${inputText}"` }
+        ],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.1,
+        response_format: { type: "json_object" }
+      })
+    } catch (e) {
+      console.error('Mugu Check Primary Model Error:', e);
+      completion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Analyze this text: "${inputText}"` }
+        ],
+        model: "llama-3.1-8b-instant",
+        temperature: 0.1,
+        response_format: { type: "json_object" }
+      })
+    }
 
     const content = completion.choices[0]?.message?.content
     if (!content) throw new Error('No content from Groq')
