@@ -33,19 +33,21 @@ export async function POST(req: Request) {
     }
 
     // 3. Call Groq SDK
-    // Using MENTOR api key variables mapped to the SDK
-    const groq = new Groq({
-        apiKey: process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
-    })
+    const apiKey = process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
+    if (!apiKey) {
+      console.error('MENTOR_API_ERROR: Missing Groq API Key')
+      return NextResponse.json({ error: 'Head Coach configuration missing' }, { status: 500 })
+    }
+
+    const groq = new Groq({ apiKey })
 
     const completion = await groq.chat.completions.create({
-        messages: conversation,
-        model: "llama-3.3-70b-versatile", // High reasoning model
+        messages: conversation as any,
+        model: "llama-3.3-70b-versatile",
         temperature: 0.7,
-        max_completion_tokens: 1024,
+        max_tokens: 1024,
         top_p: 1,
-        stream: false, // Keeping false for MVP frontend compatibility
-        stop: null
+        stream: false
     })
 
     const assistantMessage = completion.choices[0]?.message?.content || "The Head Coach is silent."
