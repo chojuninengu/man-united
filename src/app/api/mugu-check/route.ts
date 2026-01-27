@@ -3,17 +3,29 @@ import { createClient } from '@/lib/supabase/server'
 import { Groq } from 'groq-sdk'
 
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   try {
-    const { inputText } = await req.json()
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const { inputText } = body;
     
-    // Quick heuristic check first to save API calls
-    if (inputText.length < 5) return NextResponse.json({ isMugu: false })
+    if (!inputText || inputText.length < 5) {
+        return NextResponse.json({ isMugu: false })
+    }
+
+    // Use SDK
+    const apiKey = process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
+    if (!apiKey) {
+      console.error('Mugu Check: Missing API Key')
+      return NextResponse.json({ isMugu: false })
+    }
+
+    const groq = new Groq({ apiKey })
 
     // Strict detector prompt
     const systemPrompt = `
@@ -34,14 +46,6 @@ export async function POST(req: Request) {
       "explanation": "Why it's bad (concise)"
     }
     `
-    // Use SDK
-    const apiKey = process.env.GROQ_API_KEY || process.env.MENTOR_API_KEY
-    if (!apiKey) {
-      console.error('Mugu Check: Missing API Key')
-      return NextResponse.json({ isMugu: false })
-    }
-
-    const groq = new Groq({ apiKey })
 
     let completion;
     try {
@@ -72,15 +76,17 @@ export async function POST(req: Request) {
 
     const result = JSON.parse(content)
 
-    // Save check to DB for analytics
+    // Save check to DB for analytics (Non-blocking)
     if (result.isMugu) {
-        await supabase.from('mugu_checks').insert({
+        supabase.from('mugu_checks').insert({
             user_id: user.id,
             input_text: inputText,
             is_mugu: true,
             correction: result.correction,
             explanation: result.explanation
-        } as any)
+        } as any).then(({error}: any) => {
+          if (error) console.error('Supabase Mugu Check Insert Error:', error)
+        })
     }
 
     return NextResponse.json(result)
