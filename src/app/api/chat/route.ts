@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { HEAD_COACH_SYSTEM_PROMPT } from '@/lib/mentor/prompts'
-import { Groq } from 'groq-sdk'
 
-export const maxDuration = 30; // Extend Vercel limit if on Pro, but for Hobby it's ignored.
-// However, adding it doesn't hurt.
+// Prefer Edge runtime on Vercel Hobby to avoid short Serverless timeouts.
+// We call Groq via fetch so it works in Edge environments.
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
   try {
@@ -74,50 +75,64 @@ export async function POST(req: Request) {
         })
     }
 
-    // 5. Call Groq SDK
-    const groq = new Groq({ apiKey })
+    // 5. Call Groq via fetch (Edge-safe)
+    const groqUrl = 'https://api.groq.com/openai/v1/chat/completions'
 
-    let completion;
-    try {
-      // Use a race to implement a manual timeout for the Groq call
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Groq API Timeout')), 25000)
-      );
+    async function callGroq(model: string) {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 25_000)
 
-      const groqPromise = groq.chat.completions.create({
-          messages: conversation as any,
-          model: "llama-3.3-70b-versatile",
-          temperature: 0.7,
-          max_tokens: 1024,
-          top_p: 1,
-          stream: false
-      });
+      try {
+        const res = await fetch(groqUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: conversation,
+            temperature: 0.7,
+            max_tokens: 1024,
+            top_p: 1,
+            stream: false,
+          }),
+          signal: controller.signal,
+        })
 
-      completion = await Promise.race([groqPromise, timeoutPromise]) as any;
-    } catch (groqError: any) {
-      console.error('GROQ_PRIMARY_MODEL_ERROR:', groqError);
+        const json = await res.json().catch(() => null)
 
-      // Attempt fallback if it's not a timeout
-      if (groqError.message !== 'Groq API Timeout') {
-          try {
-              completion = await groq.chat.completions.create({
-                  messages: conversation as any,
-                  model: "llama-3.1-8b-instant",
-                  temperature: 0.7,
-                  max_tokens: 1024,
-                  top_p: 1,
-                  stream: false
-              });
-          } catch (fallbackError: any) {
-              console.error('GROQ_FALLBACK_MODEL_ERROR:', fallbackError);
-              throw fallbackError;
-          }
-      } else {
-          throw groqError;
+        if (!res.ok) {
+          const detail = json?.error?.message || json?.message || `HTTP ${res.status}`
+          throw new Error(detail)
+        }
+
+        return json
+      } finally {
+        clearTimeout(timeout)
       }
     }
 
-    const assistantMessage = completion.choices[0]?.message?.content || "The Head Coach is silent."
+    let completion: any
+    try {
+      completion = await callGroq('llama-3.3-70b-versatile')
+    } catch (groqError: any) {
+      const msg = groqError?.name === 'AbortError' ? 'Groq API Timeout' : groqError?.message
+      console.error('GROQ_PRIMARY_MODEL_ERROR:', msg)
+
+      if (msg !== 'Groq API Timeout') {
+        try {
+          completion = await callGroq('llama-3.1-8b-instant')
+        } catch (fallbackError: any) {
+          console.error('GROQ_FALLBACK_MODEL_ERROR:', fallbackError?.message || fallbackError)
+          throw fallbackError
+        }
+      } else {
+        throw groqError
+      }
+    }
+
+    const assistantMessage = completion?.choices?.[0]?.message?.content || 'The Head Coach is silent.'
 
     // 6. Save to Supabase (Assistant response, Non-blocking)
     if (!isGeneralChat && missionId) {
