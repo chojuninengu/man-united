@@ -47,8 +47,6 @@ export function useChat({ missionId }: { missionId: string | null }) {
   }, [missionId, supabase])
 
   const sendMessage = async (content: string, mode: string) => {
-    if (!missionId) return
-    
     // Optimistic UI
     const newMessage: Message = { role: 'user', content }
     setMessages(prev => [...prev, newMessage])

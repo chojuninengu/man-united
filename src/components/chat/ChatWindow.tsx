@@ -84,60 +84,6 @@ export function ChatWindow() {
         // Optional: automatically send or let user review? Let's let user review.
     }
 
-    if (!missionId) {
-        return (
-            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-                <div className="max-w-3xl space-y-8">
-                    {/* Header */}
-                    <div className="space-y-2">
-                        <h1 className="text-5xl font-bold text-mu-red-primary tracking-tight">
-                            MAN-UNITED
-                        </h1>
-                        <p className="text-muted-foreground text-lg">
-                            Elite Social Strategy Command Center
-                        </p>
-                    </div>
-
-                    {/* Quick Start Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
-                        <div className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer">
-                            <div className="text-left space-y-2">
-                                <div className="text-mu-gold-primary font-bold">🎯 Start New Mission</div>
-                                <p className="text-sm text-muted-foreground">
-                                    Create a new target profile and begin tactical operations
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer">
-                            <div className="text-left space-y-2">
-                                <div className="text-mu-gold-primary font-bold">🏠 Home Mode</div>
-                                <p className="text-sm text-muted-foreground">
-                                    Master online/texting strategies with the Head Coach
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer">
-                            <div className="text-left space-y-2">
-                                <div className="text-mu-gold-primary font-bold">🏟️ Away Mode</div>
-                                <p className="text-sm text-muted-foreground">
-                                    Get real-time advice for in-person interactions
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="pt-8">
-                        <p className="text-sm text-muted-foreground">
-                            Select a mission from the sidebar or create a new one to begin
-                        </p>
-                    </div>
-                </div>
-            </div>
-        )
-    }
 
     return (
         <div className="flex flex-col h-full bg-background relative">
@@ -154,21 +100,56 @@ export function ChatWindow() {
             />
 
             {/* Header Info */}
-            {activeMission && (
-                <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30 sticky top-0 z-10 backdrop-blur">
+            <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30 sticky top-0 z-10 backdrop-blur">
+                {activeMission ? (
                     <div>
                         <div className="font-bold text-sm">{activeMission.target_name}</div>
                         <div className="text-xs text-muted-foreground uppercase tracking-wider">{activeMission.stage} STAGE</div>
                     </div>
-                    <div className="text-xs font-mono bg-black/20 px-2 py-1 rounded">
-                        MODE: {activeMission.mode.toUpperCase()}
+                ) : (
+                    <div>
+                        <div className="font-bold text-sm text-mu-red-primary tracking-wide">HEADQUARTERS</div>
+                        <div className="text-xs text-muted-foreground uppercase tracking-wider">GENERAL STRATEGY</div>
                     </div>
+                )}
+                <div className="text-xs font-mono bg-black/20 px-2 py-1 rounded">
+                    MODE: {(activeMission?.mode || 'HOME').toUpperCase()}
                 </div>
-            )}
+            </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 && (
+                {messages.length === 0 && !missionId && (
+                    <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-700">
+                        <div className="max-w-2xl space-y-8">
+                            <div className="space-y-2">
+                                <h1 className="text-5xl font-bold text-mu-red-primary tracking-tight">
+                                    COMMAND CENTER
+                                </h1>
+                                <p className="text-muted-foreground text-lg">
+                                    Ask the Head Coach anything about elite social strategy.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                                <div className="p-4 rounded-lg border border-border bg-card/50 text-left">
+                                    <div className="text-mu-gold-primary font-bold text-xs mb-1">TACTICAL INQUIRY</div>
+                                    <p className="text-xs text-muted-foreground italic">
+                                        "How do I handle a girl who ghosts me after a great first date?"
+                                    </p>
+                                </div>
+                                <div className="p-4 rounded-lg border border-border bg-card/50 text-left">
+                                    <div className="text-mu-gold-primary font-bold text-xs mb-1">CONCEPT CLARIFICATION</div>
+                                    <p className="text-xs text-muted-foreground italic">
+                                        "Explain the Offside Trap in a real-world social setting."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {messages.length === 0 && missionId && (
                     <div className="text-center text-muted-foreground text-sm my-10 space-y-2">
                         <p>Mission Initialized.</p>
                         <p className="text-xs opacity-70">Report the situation to the Head Coach.</p>

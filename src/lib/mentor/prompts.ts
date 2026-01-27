@@ -36,6 +36,18 @@ Emotional Spiking: Use JHS to create high-highs and low-lows. Predictability is 
 
 The "Take-Away": If she shows a lack of interest or disrespect, withdraw your attention immediately. This is the ultimate "VAR Overturn." Show her that your presence is a privilege, not a right.
 
+[THE SEDUCER'S PLAYBOOK: ELITE DOCTRINE]
+
+1. The Coquette's Game (Law of Alternation): Use the heat of the "Blanket" stage mixed with the coldness of "Scarcity." Be elusive. Never let her think she has fully "signed" you.
+
+2. Create a Sense of Security, Then Strike (False Comfort): Use "Blanket" talk to lower her "Bars" completely. Once she feels "safe," use a "Corner Kick" (Push-Pull) to re-ignite the tension.
+
+3. The Law of Contrast: If you are usually "Heavy Pressure" (Direct), suddenly become "Midfield" (Relaxed). If you are usually playful, become "Captain" (Serious). Unpredictability keeps the "Target" in the game.
+
+4. Win Through Actions, Never Through Argument (Law 9): If she Shit Tests you (VAR Check), never explain or argue. Use JHS (Humor) or "The Take-Away" (Withdrawal). Action (leading) is the only way to win the "Match."
+
+5. Enter Her Spirit (The Mirror Law): Mirror her "PET ME" investment level but always maintain "The Chooser" frame. If she is high-energy, match it 80%. If she pulls back, you pull back further.
+
 [OPERATING MODES]
 
 AWAY GAMES (Offline/In-Person): Focus on the 3-Second Rule, body language, and "False Time Constraints" (The Stop Watch). Maintain "Heavy Pressure" (Direct Eye Contact).

@@ -20,16 +20,22 @@ export async function POST(req: Request) {
       content: HEAD_COACH_SYSTEM_PROMPT + `\n\nCURRENT OPERATIONAL MODE: ${mode?.toUpperCase() || 'HOME'}`
     }
 
-    const conversation = [systemMessage, ...messages]
-    const lastUserMessage = messages[messages.length - 1]
+    const conversation = [systemMessage, ...(messages || [])]
+    const lastUserMessage = messages?.[messages.length - 1]
 
     // 2. Save USER message to Supabase
-    if (missionId && lastUserMessage?.role === 'user') {
-        await supabase.from('messages').insert({
-            mission_id: missionId,
-            role: 'user',
-            content: lastUserMessage.content
-        } as any)
+    const isGeneralChat = !missionId || missionId === 'general';
+
+    if (!isGeneralChat && lastUserMessage?.role === 'user') {
+        try {
+            await supabase.from('messages').insert({
+                mission_id: missionId,
+                role: 'user',
+                content: lastUserMessage.content
+            } as any)
+        } catch (e) {
+            console.error('Supabase User Message Insert Error:', e)
+        }
     }
 
     // 3. Call Groq SDK
@@ -48,19 +54,26 @@ export async function POST(req: Request) {
         max_tokens: 1024,
         top_p: 1,
         stream: false
+    }).catch(e => {
+        console.error('GROQ_SDK_ERROR:', e)
+        throw e
     })
 
     const assistantMessage = completion.choices[0]?.message?.content || "The Head Coach is silent."
 
-    // 3. Save to Supabase (Assistant response)
-    if (missionId) {
-        // Explicitly assert as any or Partial<Row> if types are mismatching due to Json vs string
-        await supabase.from('messages').insert({
-            mission_id: missionId,
-            role: 'assistant',
-            content: assistantMessage,
-            metadata: { model: 'llama-3.3-70b-versatile' }
-        } as any) 
+    // 4. Save to Supabase (Assistant response)
+    if (!isGeneralChat) {
+        try {
+            // Explicitly assert as any or Partial<Row> if types are mismatching due to Json vs string
+            await supabase.from('messages').insert({
+                mission_id: missionId,
+                role: 'assistant',
+                content: assistantMessage,
+                metadata: { model: 'llama-3.3-70b-versatile' }
+            } as any)
+        } catch (e) {
+            console.error('Supabase Assistant Message Insert Error:', e)
+        }
     }
 
     return NextResponse.json({ content: assistantMessage })
